@@ -1,73 +1,64 @@
-# React + TypeScript + Vite
+# 🛒 Vortex Store Hub (Інтернет-магазин)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## 🛠 Стек технологій
 
-Currently, two official plugins are available:
+- **Frontend:** React 19.2 (Functional Components, Hooks), TypeScript 6.0
+- **Routing & State Management:** React Router 7.14 (використання екосистеми суміщеного клієнт-серверного роутингу, Loaders, Actions)
+- **Backend-as-a-Service:** Supabase Client 2.101 (PostgreSQL, Auth)
+- **Styling & UI:** \* Tailwind CSS v4.2 (використання нового Vite-плагіна `@tailwindcss/vite` для надшвидкої збірки)
+  - Shadcn UI / Radix UI (адаптивні та доступні компоненти: Sheet, Accordion, ScrollArea, Button)
+    - Класи та анімації: `clsx`, `tailwind-merge` (утиліта `cn`), `tw-animate-css`
+- **Валідація та Форми:** React Hook Form 7.72 + Zod 4.3 (для безпечної та суворо типізованої валідації полів реєстрації, чекауту та фільтрів)
+- **Утиліти:** `use-debounce` (оптимізація пошукових запитів), `sonner` (інтерактивні спливаючі сповіщення)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## 🚀 Ключовий функціонал
 
-## React Compiler
+- 🔐 **Синхронізована авторизація:** Реєстрація та вхід (Supabase Auth).
+- 💻 **Просунутий параметричний пошук та фільтрація:**
+  - Пошук за назвою в реальному часі з дебаунсом (`use-debounce`) для зниження навантаження на мережу.
+  - Множинні фільтри за технічними характеристиками (Бренд, Процесор, Кількість ядер, Тип/Обсяг оперативної пам'яті, Відеокарта, ОС).
+  - Фільтрація за діапазоном цін (Price Range).
+  - Повне збереження стану фільтрів в URL (`searchParams`) — посиланням на відфільтрований каталог можна поділитися.
+- 🛍 **Керування кошиком (Cart):** Додавання товарів, інтерактивна зміна кількості, автоматичний перерахунок вартості без перезавантаження сторінок.
+- 📦 **Оформлення замовлення (Checkout):** Інтегрований лоадер та екшен для перевірки вмісту кошика, заповнення даних доставки та фіксації замовлення.
+- 📜 **Історія замовлень:** Особистий кабінет користувача зі списком усіх оформлених покупок та їхнім статусом.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## 🧠 Оптимізація та Робота з Мережею
+* **Дебаунс текстового пошуку:** Пошук за назвою товарів інтегровано з хуком `useDebouncedCallback` (затримка 600 мс).
+* **Збереження стану в URL (`searchParams`):** Усі обрані параметри фільтрації (Бренди, Характеристики, Діапазон цін) миттєво синхронізуються з URL-адресою за допомогою `useSearchParams`.
 
-## Expanding the ESLint configuration
+## 🗄️ База Даних та Автоматизація (Supabase)
+Проєкт використовує реляційну СУБД **PostgreSQL** на боці Supabase:
+* **PostgreSQL-Тригери (`handle_new_user`):** Налаштовано системний тригер `AFTER INSERT ON auth.users`. Одразу після реєстрації нового клієнта через Supabase Auth, база даних автоматично створює дзеркальний запис із його UUID у публічній таблиці `profiles`.
+* **Архітектура зв'язків (Foreign Keys):** Кошик користувача (`cart_items`) та замовлення повністю прив'язані до ідентифікатора профілю, що забезпечує збереження обраних товарів навіть при зміні пристрою чи очищенні локального сховища браузера.
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## 🛡️ Безпека та Захист Роутів
+* **Protected Routes:** Маршрути кошика (`/cart`), чекауту (`/checkout`) та історії замовлень захищені на рівні `authLoader`. Доступ надається лише за наявності валідної сесії Supabase, інакше користувача автоматично перенаправляє на сторінку авторизації.
+* **Роузний Catch-all Редірект:** Замість падіння додатка при переході на неіснуючу сторінку, глобальний роут `path: "*"` через `notFoundRedirectLoader` м'яко повертає користувача на головну сторінку каталогу із збереженням стану сесії.
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## 🔧 Інсталізація та Локальний Запуск
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+Щоб запустити цей проєкт локально на своєму комп'ютері, виконайте наступні кроки:
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+### 1. Клонування репозиторію та перехід у папку
+```bash
+git clone https://github.com/denyskorniienko22/vortex-store-hub.git
+cd vortex-store-hub
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+### 2. Встановлення всіх залежностей
+```bash
+npm install
+```
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+### 3. Налаштування змінних оточення (.env)
+Створіть у корені проєкту файл .env.local та додайте туди свої ключі від Supabase:
+```bash
+VITE_SUPABASE_URL="your_supabase_project_url"
+VITE_SUPABASE_ANON_KEY="your_supabase_anon_public_key"
+```
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+### 4. Запуск у режимі розробки
+```bash
+npm run dev
 ```
